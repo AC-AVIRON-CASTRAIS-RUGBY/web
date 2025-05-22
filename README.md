@@ -1,6 +1,6 @@
 # 🖥️ Application Web - Gestion de Tournois de Rugby (PHP)
 
-Cette interface web permet d’administrer les données du projet de gestion de tournois de rugby. Elle est développée en PHP pur, sans framework, pour une structure simple et rapide à mettre en place.
+Cette interface web permet d'administrer les données du projet de gestion de tournois de rugby. Elle est développée en PHP pur, sans framework, pour une structure simple et rapide à mettre en place. Elle utilise une API pour récupérer les données.
 
 ## 📁 Structure
 ```
@@ -14,16 +14,16 @@ web/
 │   ├── controllers/
 │   ├── models/
 │   ├── lib/
-│       └── Database.php
+│       ├── ApiClient.php
 │   ├── views/
 │   │   └── header.php
 │   └── config/
-│       └── db.php
+│       └── api.php
 └── README.md
 ```
 
 ## ⚙️ Installation
-> Ce projet nécessite une base de données, voir [🔧 Configuration de la base de données](#-configuration-de-la-base-de-données).
+> Ce projet nécessite une API, voir [🔧 Configuration de l'API](#-configuration-de-lapi).
 ```bash
 git clone https://github.com/ton-utilisateur/projet-web-php.git
 cd projet-web-php
@@ -35,12 +35,11 @@ Placez le dossier dans le répertoire htdocs (ou équivalent), puis accèdez à 
 http://localhost/web/public
 ```
 
-## 🔧 Configuration de la base de données
-Créez un fichier `src/config/db.php` contenant :
+## 🔧 Configuration de l'API
+Créez un fichier `src/config/api.php` contenant :
 ```php
 <?php
-define('DB_HOST', 'ADDRESSE_DE_LA_BASE_DE_DONNEES');
-define('DB_NAME', 'NOM_DE_LA_BASE_DE_DONNEES');
-define('DB_USER', 'NOM_UTILISATEUR');
-define('DB_PASS', 'MOT_DE_PASSE');
+define('API_BASE_URL', 'http://localhost:3000/api');
 ```
+
+Assurez-vous que l'API est en cours d'exécution sur l'URL spécifiée.
