@@ -1,6 +1,6 @@
-# 🖥️ Application Web - Gestion de Tournois de Rugby (PHP)
+# 🖥️ Application Web - Gestion de Tournois d'Aviron (PHP)
 
-Cette interface web permet d'administrer les données du projet de gestion de tournois de rugby. Elle est développée en PHP pur, sans framework, pour une structure simple et rapide à mettre en place. Elle utilise une API pour récupérer les données.
+Cette interface web permet d'administrer les données du projet de gestion de tournois d'aviron. Elle est développée en PHP pur, sans framework, pour une structure simple et rapide à mettre en place. Elle utilise une API pour récupérer les données.
 
 ## 📁 Structure
 ```
@@ -14,9 +14,18 @@ web/
 │   ├── controllers/
 │   ├── models/
 │   ├── lib/
-│       ├── ApiClient.php
+│       └── ApiClient.php
 │   ├── views/
-│   │   └── header.php
+│   │   ├── includes/
+│   │   │   └── header.php
+│   │   ├── auth/
+│   │   │   └── login.php
+│   │   ├── home.php
+│   │   ├── dashboard.php
+│   │   ├── teams.php
+│   │   ├── referees.php
+│   │   ├── ranking.php
+│   │   └── calendar.php
 │   └── config/
 │       └── api.php
 └── README.md
@@ -43,3 +52,15 @@ define('API_BASE_URL', 'http://localhost:3000/api');
 ```
 
 Assurez-vous que l'API est en cours d'exécution sur l'URL spécifiée.
+
+## 🚀 Fonctionnalités
+- **Authentification** : Connexion sécurisée des utilisateurs
+- **Dashboard** : Vue d'ensemble des tournois et statistiques
+- **Gestion des équipes** : Ajout, modification et suppression d'équipes
+- **Gestion des arbitres** : Administration des arbitres de tournoi
+- **Classements** : Affichage et impression des classements
+- **Calendrier** : Planning des matchs
+- **Impression** : Impression directe des classements optimisée
+
+## 📱 Interface responsive
+L'application s'adapte automatiquement aux différentes tailles d'écran (desktop, tablette, mobile).

@@ -1,1 +1,9 @@
 /src/config/api.php
+/vendor/
+*.log
+.DS_Store
+Thumbs.db
+*.tmp
+*.bak
+/nbproject/
+.idea/workspace.xml

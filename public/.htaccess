@@ -1,0 +1,30 @@
+# Configuration pour les requêtes CORS
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Redirection des appels API vers l'API backend
+RewriteEngine On
+
+# Proxy pour les requêtes API
+RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
+
+# Redirection vers index.php pour les autres routes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php [QSA,L]
+
+# Configuration pour les fichiers statiques
+<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg)$">
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+</FilesMatch>
+
+# Configuration de sécurité
+<Files "*.php">
+    Order allow,deny
+    Allow from all
+</Files>
+
+# Masquer les informations sensibles
+ServerSignature Off
