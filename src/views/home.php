@@ -22,15 +22,7 @@
             </button>
         </div>
 
-        <?php if (empty($tournaments)): ?>
-            <div class="empty-state">
-                <i class="fas fa-trophy empty-icon"></i>
-                <p>Vous n'avez pas encore créé de tournoi</p>
-                <button class="btn-add" id="createFirstTournamentBtn">
-                    Créer mon premier tournoi
-                </button>
-            </div>
-        <?php else: ?>
+        <?php if (!empty($tournaments)): ?>
             <div class="tournaments-grid">
                 <?php foreach ($tournaments as $tournament): ?>
                     <div class="tournament-card">
