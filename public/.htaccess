@@ -14,12 +14,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/legals/
 RewriteRule ^(.*)$ index.php [QSA,L]
 
-# Configuration pour les fichiers statiques
-<FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg)$">
-    ExpiresActive On
-    ExpiresDefault "access plus 1 month"
-</FilesMatch>
-
 # Configuration de sécurité
 <Files "*.php">
     Order allow,deny
@@ -28,3 +22,24 @@ RewriteRule ^(.*)$ index.php [QSA,L]
 
 # Masquer les informations sensibles
 ServerSignature Off
+
+# Cache pour les fichiers statiques (si mod_expires est disponible)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+</IfModule>
+
+# Alternative pour le cache si mod_headers est disponible
+<IfModule mod_headers.c>
+    <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+</IfModule>

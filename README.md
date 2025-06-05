@@ -1,66 +1,155 @@
-# 🖥️ Application Web - Gestion de Tournois d'Aviron (PHP)
+# Aviron Castrais - Système de Gestion de Tournois
 
-Cette interface web permet d'administrer les données du projet de gestion de tournois d'aviron. Elle est développée en PHP pur, sans framework, pour une structure simple et rapide à mettre en place. Elle utilise une API pour récupérer les données.
+## Description
+Application web pour la gestion des tournois d'aviron du club Aviron Castrais. Permet la gestion des équipes, arbitres, calendrier des matchs et classements.
 
-## 📁 Structure
+## Structure du projet
 ```
 web/
-├── public/
-│   ├── css/
-│   ├── js/
-│   ├── img/
-│   └── index.php → Point d'entrée de l'application
-├── src/
-│   ├── controllers/
-│   ├── models/
-│   ├── lib/
-│       └── ApiClient.php
-│   ├── views/
-│   │   ├── includes/
-│   │   │   └── header.php
-│   │   ├── auth/
-│   │   │   └── login.php
-│   │   ├── home.php
-│   │   ├── dashboard.php
-│   │   ├── teams.php
-│   │   ├── referees.php
-│   │   ├── ranking.php
-│   │   └── calendar.php
-│   └── config/
-│       └── api.php
-└── README.md
+├── public/                 # Point d'entrée web
+│   ├── css/               # Feuilles de style
+│   ├── img/               # Images et assets
+│   ├── legals/            # Pages légales
+│   ├── .htaccess          # Configuration Apache
+│   └── index.php          # Routeur principal
+├── src/                   # Code source PHP
+│   ├── controllers/       # Contrôleurs
+│   ├── lib/              # Bibliothèques
+│   ├── views/            # Vues PHP
+│   └── config/           # Configuration
+└── .htaccess             # Redirection racine
 ```
 
-## ⚙️ Installation
-> Ce projet nécessite une API, voir [🔧 Configuration de l'API](#-configuration-de-lapi).
-```bash
-git clone https://github.com/ton-utilisateur/projet-web-php.git
-cd projet-web-php
-```
+## Installation
 
-## 🌐 Lancer l'application
-Placez le dossier dans le répertoire htdocs (ou équivalent), puis accèdez à l'application via :
-```
-http://localhost/web/public
-```
+### Prérequis
+- PHP 7.4 ou supérieur
+- Serveur web Apache avec mod_rewrite
+- API Backend sur localhost:3000
 
-## 🔧 Configuration de l'API
-Créez un fichier `src/config/api.php` contenant :
+### Configuration
+1. Cloner le projet dans le répertoire web
+2. Configurer l'URL de l'API dans `src/config/api.php`
+3. S'assurer que mod_rewrite est activé
+4. Configurer le virtual host pour pointer vers le dossier `public/`
+
+### Structure d'URL
+- `/` → Page d'accueil (public/index.php)
+- `/confidentialite` → Politique de confidentialité
+- `/api/*` → Proxy vers l'API backend
+
+## Fonctionnalités
+
+### Authentification
+- Connexion des arbitres
+- Session sécurisée
+- Gestion des droits d'accès
+
+### Gestion des équipes
+- Création d'équipes avec logo
+- Catégorisation par âge
+- Modification en temps réel
+- Upload d'images
+
+### Calendrier des matchs
+- Planification automatique
+- Filtres par statut, arbitre, poule
+- Vue détaillée des matchs
+- Suivi des résultats
+
+### Classements
+- Classement général et par poule
+- Export PDF/HTML
+- Statistiques détaillées
+
+### Interface responsive
+- Design adaptatif mobile/desktop
+- Menu burger sur mobile
+- Interface intuitive
+
+## API Integration
+
+### Endpoints utilisés
+- `GET /tournaments/{id}` - Détails d'un tournoi
+- `GET /teams/{tournamentId}` - Équipes d'un tournoi
+- `POST /teams/{tournamentId}/teams` - Création d'équipe
+- `PUT /teams/{tournamentId}/teams/{id}` - Modification d'équipe
+- `POST /upload/image` - Upload d'images
+- `GET /schedule/tournaments/{id}` - Planning des matchs
+- `GET /standings/tournaments/{id}` - Classements
+
+### Configuration API
 ```php
-<?php
+// src/config/api.php
 define('API_BASE_URL', 'http://localhost:3000/api');
 ```
 
-Assurez-vous que l'API est en cours d'exécution sur l'URL spécifiée.
+## Sécurité
 
-## 🚀 Fonctionnalités
-- **Authentification** : Connexion sécurisée des utilisateurs
-- **Dashboard** : Vue d'ensemble des tournois et statistiques
-- **Gestion des équipes** : Ajout, modification et suppression d'équipes
-- **Gestion des arbitres** : Administration des arbitres de tournoi
-- **Classements** : Affichage et impression des classements
-- **Calendrier** : Planning des matchs
-- **Impression** : Impression directe des classements optimisée
+### Mesures implémentées
+- Protection CSRF via sessions
+- Validation des données utilisateur
+- Échappement HTML systématique
+- Upload sécurisé d'images
+- Headers de sécurité
 
-## 📱 Interface responsive
-L'application s'adapte automatiquement aux différentes tailles d'écran (desktop, tablette, mobile).
+### Politique de confidentialité
+- Conforme RGPD
+- Page dédiée `/confidentialite`
+- Gestion des cookies de session
+
+## Performance
+
+### Optimisations
+- Cache navigateur pour les assets
+- Compression des images
+- Minification CSS (production)
+- Requêtes API optimisées
+
+### Monitoring
+- Logs d'erreurs PHP
+- Suivi des performances API
+- Alertes de disponibilité
+
+## Développement
+
+### Debug
+- Page de test upload : `/debug-upload`
+- Logs détaillés dans les contrôleurs
+- Mode développement configurable
+
+### Standards de code
+- PSR-4 pour l'autoloading
+- Séparation MVC
+- Documentation inline
+- Tests unitaires recommandés
+
+## Déploiement
+
+### Environnement de production
+1. Vérifier la configuration Apache
+2. Activer les modules requis (mod_rewrite, mod_headers)
+3. Configurer HTTPS
+4. Sauvegarder les données régulièrement
+
+### Variables d'environnement
+```bash
+# Configuration API
+API_BASE_URL=https://api.avironcastrais.fr
+DEBUG_MODE=false
+```
+
+## Support
+
+### Contact technique
+- Email : [email technique]
+- Documentation API : [URL de la doc API]
+- Issues : [URL du repository]
+
+### Maintenance
+- Mises à jour de sécurité régulières
+- Backup automatique des données
+- Monitoring 24/7
+
+## Licence
+© 2024 Aviron Castrais. Tous droits réservés.

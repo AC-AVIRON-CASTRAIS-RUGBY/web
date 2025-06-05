@@ -1,9 +1,106 @@
-/src/config/api.php
-/vendor/
+# Fichiers de configuration sensibles
+src/config/database.php
+src/config/secrets.php
+.env
+.env.local
+
+# Logs
 *.log
+logs/
+error.log
+access.log
+
+# Cache et fichiers temporaires
+tmp/
+cache/
+temp/
+*.tmp
+*.temp
+
+# Uploads et médias générés
+public/uploads/
+public/media/user-uploads/
+*.uploaded
+
+# IDE et éditeurs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
 Thumbs.db
-*.tmp
+
+# Dépendances (si Composer est utilisé)
+vendor/
+composer.lock
+
+# Node modules (si outils front-end)
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# Build et dist
+build/
+dist/
+*.min.css
+*.min.js
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Backup et archives
 *.bak
-/nbproject/
-.idea/workspace.xml
+*.backup
+*.old
+*.orig
+*.zip
+*.tar.gz
+*.rar
+
+# Développement local
+.htaccess.local
+config.local.php
+debug.php
+test.php
+
+# Certificats et clés
+*.pem
+*.key
+*.crt
+*.p12
+
+# Documentation générée
+docs/build/
+api-docs/
+
+# Rapports de tests
+coverage/
+phpunit.xml
+.phpunit.result.cache
+
+# Sessions PHP (si stockées en fichiers)
+sessions/
+php_sessions/
+
+# Données de développement
+dev-data/
+test-data/
+sample-data/
+
+# Configuration serveur locale
+.htpasswd
+apache-local.conf
+nginx-local.conf
+
+# Fichiers de migration ou scripts sensibles
+migrate.php
+reset-db.php
+admin-tools/
