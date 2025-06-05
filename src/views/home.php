@@ -468,15 +468,52 @@ async function handleCreateTournament(event) {
     try {
         const formData = new FormData(event.target);
         
-        // Créer le tournoi via notre serveur PHP (évite les problèmes CORS)
-        const response = await fetch('index.php?route=create-tournament', {
+        // Préparer les données pour l'API
+        const tournamentData = {
+            name: formData.get('name'),
+            description: formData.get('description') || '',
+            location: formData.get('location'),
+            start_date: new Date(formData.get('start_date')).toISOString(),
+            break_time: parseInt(formData.get('break_time')) || 5,
+            points_win: parseInt(formData.get('points_win')) || 3,
+            points_draw: parseInt(formData.get('points_draw')) || 1,
+            points_loss: parseInt(formData.get('points_loss')) || 0
+        };
+        
+        // Gérer l'upload de l'image si présente
+        const imageFile = formData.get('image');
+        if (imageFile && imageFile.size > 0) {
+            try {
+                const imageFormData = new FormData();
+                imageFormData.append('image', imageFile);
+                
+                const uploadResponse = await fetch('https://api.avironcastrais.fr/upload/image', {
+                    method: 'POST',
+                    body: imageFormData
+                });
+                
+                if (uploadResponse.ok) {
+                    const uploadResult = await uploadResponse.json();
+                    tournamentData.image = uploadResult.url;
+                }
+            } catch (uploadError) {
+                console.warn('Erreur upload image:', uploadError);
+                // Continuer sans image si l'upload échoue
+            }
+        }
+        
+        // Créer le tournoi
+        const response = await fetch('https://api.avironcastrais.fr/tournaments', {
             method: 'POST',
-            body: formData
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(tournamentData)
         });
         
-        const result = await response.json();
-        
-        if (response.ok && result.success) {
+        if (response.ok) {
+            const result = await response.json();
+            
             // Fermer le modal
             closeCreateTournamentModal();
             
@@ -486,12 +523,13 @@ async function handleCreateTournament(event) {
             // Recharger la page pour afficher le nouveau tournoi
             window.location.reload();
         } else {
-            throw new Error(result.error || 'Erreur lors de la création du tournoi');
+            const errorText = await response.text();
+            throw new Error('Erreur lors de la création: ' + response.status + ' - ' + errorText);
         }
         
     } catch (error) {
         console.error('Erreur création tournoi:', error);
-        alert('Erreur lors de la création du tournoi: ' + error.message);
+        alert('Erreur lors de la création du tournoi. Veuillez réessayer.');
     } finally {
         // Réactiver le bouton
         submitBtn.disabled = false;
