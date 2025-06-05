@@ -51,6 +51,10 @@ class ApiClient {
     public function post($endpoint, $data) {
         $url = $this->baseUrl . '/' . ltrim($endpoint, '/');
         
+        // Log pour debug
+        error_log("API POST Request - URL: " . $url);
+        error_log("API POST Request - Data: " . json_encode($data));
+        
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, true);
@@ -65,6 +69,12 @@ class ApiClient {
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
+        
+        // Log pour debug
+        error_log("API POST Response - HTTP Code: " . $httpCode);
+        error_log("API POST Response - Body: " . $response);
+        error_log("API POST Response - cURL Error: " . $error);
+        
         curl_close($ch);
         
         if ($error) {
@@ -72,9 +82,25 @@ class ApiClient {
         }
         
         if ($httpCode >= 200 && $httpCode < 300) {
-            return json_decode($response, true) ?? [];
+            $decoded = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('Invalid JSON response: ' . $response);
+            }
+            return $decoded ?? [];
         } else {
-            throw new Exception('API request failed with HTTP code: ' . $httpCode . ' - Response: ' . $response);
+            // Essayer de décoder la réponse d'erreur pour plus de détails
+            $errorResponse = json_decode($response, true);
+            $errorMessage = 'API request failed with HTTP code: ' . $httpCode;
+            
+            if ($errorResponse && isset($errorResponse['message'])) {
+                $errorMessage .= ' - ' . $errorResponse['message'];
+            } elseif ($errorResponse && isset($errorResponse['error'])) {
+                $errorMessage .= ' - ' . $errorResponse['error'];
+            } else {
+                $errorMessage .= ' - Response: ' . $response;
+            }
+            
+            throw new Exception($errorMessage);
         }
     }
 

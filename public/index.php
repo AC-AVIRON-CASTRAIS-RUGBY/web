@@ -420,6 +420,76 @@ switch ($route) {
         }
         exit;
 
+    case 'create-tournament':
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        try {
+            $api = new ApiClient();
+            
+            // Récupérer les données du formulaire
+            $tournamentData = [
+                'name' => $_POST['name'] ?? '',
+                'description' => $_POST['description'] ?? '',
+                'location' => $_POST['location'] ?? '',
+                'start_date' => $_POST['start_date'] ?? '',
+                'break_time' => (int)($_POST['break_time'] ?? 5),
+                'points_win' => (int)($_POST['points_win'] ?? 3),
+                'points_draw' => (int)($_POST['points_draw'] ?? 1),
+                'points_loss' => (int)($_POST['points_loss'] ?? 0)
+            ];
+
+            // Validation des données requises
+            if (empty($tournamentData['name']) || empty($tournamentData['location']) || empty($tournamentData['start_date'])) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Nom, lieu et date de début sont requis']);
+                exit;
+            }
+
+            // Convertir la date au format ISO
+            try {
+                $date = new DateTime($tournamentData['start_date']);
+                $tournamentData['start_date'] = $date->format('c'); // Format ISO 8601
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Format de date invalide']);
+                exit;
+            }
+
+            // Gérer l'upload d'image si présente
+            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                try {
+                    $uploadResponse = $api->uploadImage($_FILES['image']['tmp_name']);
+                    if (isset($uploadResponse['url'])) {
+                        $tournamentData['image'] = $uploadResponse['url'];
+                    }
+                } catch (Exception $e) {
+                    // Continuer sans image si l'upload échoue
+                    error_log('Image upload failed: ' . $e->getMessage());
+                }
+            }
+
+            // Créer le tournoi via l'API
+            $result = $api->post('tournaments', $tournamentData);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Tournoi créé avec succès',
+                'data' => $result
+            ]);
+
+        } catch (Exception $e) {
+            error_log('Tournament creation error: ' . $e->getMessage());
+            http_response_code(500);
+            echo json_encode(['error' => 'Erreur lors de la création du tournoi: ' . $e->getMessage()]);
+        }
+        exit;
+
     case 'debug-upload':
         require_once '../src/views/debug-upload.php';
         break;
