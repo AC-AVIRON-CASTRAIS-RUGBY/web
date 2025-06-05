@@ -377,7 +377,7 @@
                 </div>
                 <div class="api-detail">
                     <label>URL complète:</label>
-                    <span>http://localhost:3000/api/upload/image</span>
+                    <span>https://api.avironcastrais.fr/upload/image</span>
                 </div>
                 <div class="api-detail">
                     <label>Content-Type:</label>
@@ -629,7 +629,7 @@
                 console.log('Taille:', selectedFile.size);
                 console.log('FormData créé avec succès');
 
-                const response = await fetch('http://localhost:3000/api/upload/image', {
+                const response = await fetch('https://api.avironcastrais.fr/upload/image', {
                     method: 'POST',
                     body: formData
                 });
@@ -709,7 +709,7 @@
 
         // Afficher les informations de debug au chargement
         console.log('=== DEBUG UPLOAD PAGE ===');
-        console.log('API Endpoint: http://localhost:3000/api/upload/image');
+        console.log('API Endpoint: https://api.avironcastrais.fr/upload/image');
         console.log('Expected Content-Type: multipart/form-data');
         console.log('Expected field name: image');
         console.log('========================');

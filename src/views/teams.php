@@ -213,7 +213,7 @@ document.getElementById('editTeamForm').addEventListener('submit', async functio
             const formData = new FormData();
             formData.append('image', fileInput.files[0]);
             
-            const uploadResponse = await fetch('http://localhost:3000/api/upload/image', {
+            const uploadResponse = await fetch('https://api.avironcastrais.fr/upload/image', {
                 method: 'POST',
                 body: formData
             });
@@ -233,7 +233,7 @@ document.getElementById('editTeamForm').addEventListener('submit', async functio
         if (logoUrl) teamData.logo = logoUrl;
         
         // Envoyer la requête PUT pour modifier l'équipe
-        const response = await fetch(`http://localhost:3000/api/teams/${tournamentId}/teams/${teamId}`, {
+        const response = await fetch(`https://api.avironcastrais.fr/teams/${tournamentId}/teams/${teamId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'

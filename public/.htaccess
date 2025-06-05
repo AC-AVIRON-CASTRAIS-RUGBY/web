@@ -6,7 +6,7 @@ Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
 RewriteEngine On
 
 # Proxy pour les requêtes API
-RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
+RewriteRule ^api/(.*)$ https://api.avironcastrais.fr/$1 [P,L]
 
 # Redirection vers index.php pour les autres routes (sauf fichiers existants)
 RewriteCond %{REQUEST_FILENAME} !-f

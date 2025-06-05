@@ -136,7 +136,7 @@ class ApiClient {
      * @return array Les données renvoyées par l'API
      */
     public function uploadImage($imageTmpPath) {
-        $url = 'http://localhost:3000/api/upload/image';
+        $url = 'https://api.avironcastrais.fr/upload/image';
         
         // Fonction alternative pour détecter le type MIME sans fileinfo
         function getMimeTypeAlternative($filePath) {

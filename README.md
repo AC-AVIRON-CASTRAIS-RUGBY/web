@@ -25,7 +25,7 @@ web/
 ### Prérequis
 - PHP 7.4 ou supérieur
 - Serveur web Apache avec mod_rewrite
-- API Backend sur localhost:3000
+- API Backend sur https://api.avironcastrais.fr/
 
 ### Configuration
 1. Cloner le projet dans le répertoire web
@@ -81,7 +81,7 @@ web/
 ### Configuration API
 ```php
 // src/config/api.php
-define('API_BASE_URL', 'http://localhost:3000/api');
+define('API_BASE_URL', 'https://api.avironcastrais.fr/');
 ```
 
 ## Sécurité

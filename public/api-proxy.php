@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Configuration de l'API
-$apiBaseUrl = 'http://localhost:3000/api';
+$apiBaseUrl = 'https://api.avironcastrais.fr/';
 
 // Récupérer le chemin de l'API depuis l'URL
 $requestUri = $_SERVER['REQUEST_URI'];

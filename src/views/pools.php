@@ -580,7 +580,7 @@ async function createPhase() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
         
-        const response = await fetch(`http://localhost:3000/api/phases/tournaments/<?= $_GET['tournament_id'] ?>`, {
+        const response = await fetch(`https://api.avironcastrais.fr/phases/tournaments/<?= $_GET['tournament_id'] ?>`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -679,7 +679,7 @@ async function updatePool() {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Modification...';
         
-        const response = await fetch(`http://localhost:3000/api/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}`, {
+        const response = await fetch(`https://api.avironcastrais.fr/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -729,7 +729,7 @@ async function deletePoolConfirmed(poolId, poolName) {
         isLoading = true;
         showSuccessMessage('Suppression en cours...');
         
-        const response = await fetch(`http://localhost:3000/api/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}`, {
+        const response = await fetch(`https://api.avironcastrais.fr/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}`, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json'
@@ -793,8 +793,8 @@ async function loadTeamsData(poolId) {
         
         // Charger toutes les équipes du tournoi et les équipes de la poule en parallèle
         const [teamsResponse, poolTeamsResponse] = await Promise.all([
-            fetch(`http://localhost:3000/api/teams/<?= $_GET['tournament_id'] ?>`),
-            fetch(`http://localhost:3000/api/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams`)
+            fetch(`https://api.avironcastrais.fr/teams/<?= $_GET['tournament_id'] ?>`),
+            fetch(`https://api.avironcastrais.fr/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams`)
         ]);
         
         allTeams = await teamsResponse.json();
@@ -931,7 +931,7 @@ async function addTeamToPool(teamId, teamName) {
     
     try {
         isLoading = true;
-        const response = await fetch(`http://localhost:3000/api/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams`, {
+        const response = await fetch(`https://api.avironcastrais.fr/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -973,7 +973,7 @@ async function removeTeamFromPool(teamId, teamName) {
     
     try {
         isLoading = true;
-        const response = await fetch(`http://localhost:3000/api/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams/${teamId}`, {
+        const response = await fetch(`https://api.avironcastrais.fr/pools/tournaments/<?= $_GET['tournament_id'] ?>/${poolId}/teams/${teamId}`, {
             method: 'DELETE',
             headers: {
                 'Accept': 'application/json'

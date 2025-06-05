@@ -1061,7 +1061,7 @@ async function saveScore() {
         // Essayer d'abord l'API directe, puis le proxy en cas d'échec
         let response;
         try {
-            response = await fetch('http://localhost:3000/api/games/<?= $match['Game_Id'] ?>', {
+            response = await fetch('https://api.avironcastrais.fr/games/<?= $match['Game_Id'] ?>', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
