@@ -13,7 +13,7 @@
         Gestion des équipes
     </div>
 
-    <div class="teams-container">
+    <div class="teams-container" data-tournament-id="<?= $_GET['tournament_id'] ?>">
         <div class="teams-header">
             <div class="teams-title">
                 <i class="fas fa-users"></i>
@@ -53,10 +53,15 @@
                 ?>
                     <div class="team-card" data-category="<?= htmlspecialchars($teamCategory) ?>">
                         <div class="team-logo-section">
-                            <img src="/api/teams/<?= $team['Team_Id'] ?>/logo" 
-                                 alt="Logo de <?= htmlspecialchars($team['name']) ?>" 
-                                 class="team-logo"
-                                 onerror="this.src='img/default-team-logo.png'">
+                            <?php if (!empty($team['logo'])): ?>
+                                <img src="<?= htmlspecialchars($team['logo']) ?>" 
+                                     alt="Logo de <?= htmlspecialchars($team['name']) ?>" 
+                                     class="team-logo">
+                            <?php else: ?>
+                                <div class="team-logo-placeholder">
+                                    <?= strtoupper(substr(htmlspecialchars($team['name']), 0, 1)) ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                         
                         <div class="team-info">
@@ -65,18 +70,22 @@
                                 <span class="badge <?= htmlspecialchars($teamCategory) ?>">
                                     <?= htmlspecialchars(strtoupper($teamCategory)) ?>
                                 </span>
-                                <span class="team-id">ID: <?= $team['Team_Id'] ?></span>
                             </div>
                         </div>
                         
                         <div class="team-actions">
                             <button class="edit-btn" 
-                                    onclick="editTeam(<?= $team['Team_Id'] ?>, '<?= htmlspecialchars($team['name']) ?>', '<?= htmlspecialchars($teamCategory) ?>')"
+                                    onclick="openEditTeamModal(
+                                        <?= $team['Team_Id'] ?>,
+                                        '<?= addslashes($team['name']) ?>',
+                                        '<?= htmlspecialchars($teamCategory) ?>',
+                                        '<?= htmlspecialchars($team['logo'] ?? '') ?>'
+                                    )"
                                     title="Modifier l'équipe">
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button class="delete-btn" 
-                                    onclick="deleteTeam(<?= $team['Team_Id'] ?>, '<?= htmlspecialchars($team['name']) ?>')"
+                                    onclick="deleteTeam(<?= $team['Team_Id'] ?>, '<?= addslashes($team['name']) ?>')"
                                     title="Supprimer l'équipe">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -85,6 +94,55 @@
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>
+    </div>
+</div>
+
+<!-- Modal de modification d'équipe -->
+<div id="editTeamModal" class="modal hidden">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-edit"></i> Modifier l'équipe</h3>
+            <button class="modal-close" onclick="closeEditTeamModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="editTeamForm" class="modal-form">
+            <input type="hidden" id="editTeamId" name="teamId">
+            
+            <div class="form-group">
+                <label for="editTeamName"><i class="fas fa-tag"></i> Nom de l'équipe</label>
+                <input type="text" id="editTeamName" name="teamName" required maxlength="50">
+            </div>
+            
+            <div class="form-group">
+                <label for="editTeamCategory"><i class="fas fa-tags"></i> Catégorie d'âge</label>
+                <select id="editTeamCategory" name="age_category">
+                    <option value="">Sélectionner une catégorie</option>
+                    <?php if (!empty($categories)): ?>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?= htmlspecialchars($cat['name']) ?>">
+                                <?= htmlspecialchars(strtoupper($cat['name'])) ?>
+                            </option>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="editTeamLogo"><i class="fas fa-image"></i> Logo de l'équipe</label>
+                <input type="file" id="editTeamLogo" name="team_logo" accept="image/*">
+                <small class="form-hint">Formats acceptés : JPG, PNG, GIF, WEBP (max 5MB)</small>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeEditTeamModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Sauvegarder
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -113,31 +171,103 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
-</script>
 
-<style>
-<?php if (!empty($categories)): ?>
-    <?php foreach ($categories as $index => $category): ?>
-        .category-btn.<?= htmlspecialchars($category['name']) ?> {
-            background-color: <?= getCategoryColor($index) ?>;
-            color: <?= getCategoryTextColor($index) ?>;
+// Fonctions pour le modal de modification
+function openEditTeamModal(id, name, category, logo) {
+    document.getElementById('editTeamId').value = id;
+    document.getElementById('editTeamName').value = name;
+    document.getElementById('editTeamCategory').value = category;
+    document.getElementById('editTeamLogo').value = '';
+    document.getElementById('editTeamModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeEditTeamModal() {
+    document.getElementById('editTeamModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+}
+
+// Soumission du formulaire de modification
+document.getElementById('editTeamForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const form = e.target;
+    const submitBtn = form.querySelector('.btn-submit');
+    const originalText = submitBtn.innerHTML;
+    
+    // Désactiver le bouton et afficher le loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sauvegarde...';
+    
+    try {
+        const teamId = form.teamId.value;
+        const name = form.teamName.value.trim();
+        const category = form.age_category.value;
+        const fileInput = form.team_logo;
+        const tournamentId = document.querySelector('.teams-container').dataset.tournamentId;
+        
+        let logoUrl = null;
+        
+        // Si un nouveau fichier est sélectionné, l'uploader d'abord
+        if (fileInput.files.length > 0) {
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            
+            const uploadResponse = await fetch('http://localhost:3000/api/upload/image', {
+                method: 'POST',
+                body: formData
+            });
+            
+            if (!uploadResponse.ok) {
+                const errorData = await uploadResponse.json();
+                throw new Error('Erreur upload: ' + (errorData.message || errorData.error || 'Erreur inconnue'));
+            }
+            
+            const uploadResult = await uploadResponse.json();
+            logoUrl = uploadResult.url;
         }
         
-        .badge.<?= htmlspecialchars($category['name']) ?> { 
-            background-color: <?= getCategoryColor($index) ?>; 
+        // Préparer les données de l'équipe
+        const teamData = { name };
+        if (category) teamData.age_category = category;
+        if (logoUrl) teamData.logo = logoUrl;
+        
+        // Envoyer la requête PUT pour modifier l'équipe
+        const response = await fetch(`http://localhost:3000/api/teams/${tournamentId}/teams/${teamId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: {
+                "name": teamData.name,
+                "logo": teamData.logo,
+                "age_category": teamData.age_category
+            }
+        });
+        
+        if (response.ok) {
+            // Succès - recharger la page
+            window.location.reload();
+        } else {
+            const errorData = await response.text();
+            throw new Error('Erreur mise à jour: ' + errorData);
         }
-    <?php endforeach; ?>
-<?php endif; ?>
-</style>
+        
+    } catch (error) {
+        alert('Erreur: ' + error.message);
+        console.error('Erreur lors de la modification:', error);
+    } finally {
+        // Réactiver le bouton
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
 
-<?php
-function getCategoryColor($index) {
-    $colors = ['#ff6b6b', '#ffa726', '#42a5f5', '#66bb6a', '#ab47bc', '#78909c'];
-    return $colors[$index % count($colors)];
+// Fonction pour supprimer une équipe (à implémenter si nécessaire)
+function deleteTeam(teamId, teamName) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer l'équipe "${teamName}" ?`)) {
+        // TODO: Implémenter la suppression
+        console.log('Supprimer équipe:', teamId);
+    }
 }
-
-function getCategoryTextColor($index) {
-    $textColors = ['#fff', '#333', '#333', '#333', '#333', '#fff'];
-    return $textColors[$index % count($textColors)];
-}
-?>
+</script>

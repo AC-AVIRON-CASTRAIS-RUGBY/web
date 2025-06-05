@@ -1,0 +1,7 @@
+RewriteEngine On
+
+# Route spéciale pour confidentialité
+RewriteRule ^confidentialite/?$ public/legals/confidentialite.php [L]
+
+# Rediriger tout le reste vers le dossier public
+RewriteRule ^(?!public/)(.*)$ public/$1 [L]

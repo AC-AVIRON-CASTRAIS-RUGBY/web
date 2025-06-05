@@ -45,11 +45,11 @@
                 });
                 ?>
                 <?php foreach ($standing as $team): ?>
-                    <tr class="team-row" data-team-id="<?= $team['Team_Id'] ?>">
+                    <tr class="team-row" data-team-id="<?= $team['teamIdsString'] ?>">
                         <td><?= $team['rank'] ?></td>
                         <td class="team-cell">
                             <?php if ($team['logo']): ?>
-                                <img src="/api/teams/<?= $team['Team_Id'] ?>/logo" alt="Logo" class="team-logo">
+                                <img src="<?= $team['logo'] ?>" alt="Logo" class="team-logo">
                             <?php else: ?>
                                 <div class="team-logo" style="background: linear-gradient(135deg, #232c5a, #1a2147); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
                                     <?= strtoupper(substr($team['name'], 0, 2)) ?>

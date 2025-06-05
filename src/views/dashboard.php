@@ -108,7 +108,7 @@
                     $teamCategory = $team['age_category'] ?? 'unknown';
                 ?>
                     <div class="team-item" data-category="<?= htmlspecialchars($teamCategory) ?>">
-                        <img src="/api/teams/<?php echo $team['Team_Id']; ?>/logo" alt="Logo de l'équipe">
+                        <img src="<?php echo $team['logo']; ?>" alt="Logo de l'équipe" style="width: 30px; height: 30px; border-radius: 50%;">
                         <span><?php echo $team['name']; ?></span>
                         <span class="badge <?= htmlspecialchars($teamCategory) ?>"><?= strtoupper($teamCategory) ?></span>
                     </div>
@@ -126,6 +126,15 @@
                     Ajouter <i class="fas fa-plus"></i>
                 </a>
             </div>
+            
+            <?php
+            // Filtrer les doublons d'arbitres (garder un seul par Referee_Id)
+            $uniqueReferees = [];
+            foreach ($referees as $r) {
+                $uniqueReferees[$r['Referee_Id']] = $r;
+            }
+            $referees = array_values($uniqueReferees);
+            ?>
             <div class="referees-list" id="refereesList">
                 <?php foreach ($referees as $referee): ?>
                     <div class="referee-item">

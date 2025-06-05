@@ -26,6 +26,14 @@
         
         <div class="referees-list">
             <?php if (!empty($referees)): ?>
+                <?php
+                // Filtrer les doublons d'arbitres (garder un seul par Referee_Id)
+                $uniqueReferees = [];
+                foreach ($referees as $r) {
+                    $uniqueReferees[$r['Referee_Id']] = $r;
+                }
+                $referees = array_values($uniqueReferees);
+                ?>
                 <?php foreach ($referees as $referee): ?>
                     <div class="referee-item">
                         <div class="referee-info">

@@ -3,15 +3,15 @@ Header always set Access-Control-Allow-Origin "*"
 Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
 Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
 
-# Redirection des appels API vers l'API backend
 RewriteEngine On
 
 # Proxy pour les requêtes API
 RewriteRule ^api/(.*)$ http://localhost:3000/api/$1 [P,L]
 
-# Redirection vers index.php pour les autres routes
+# Redirection vers index.php pour les autres routes (sauf fichiers existants)
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_URI} !^/legals/
 RewriteRule ^(.*)$ index.php [QSA,L]
 
 # Configuration pour les fichiers statiques
