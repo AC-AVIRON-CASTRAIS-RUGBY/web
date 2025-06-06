@@ -163,7 +163,7 @@ switch ($route) {
         }
 
         $api = new ApiClient();
-        $standing = $api->get('pools/tournaments/'.$tournament_id.'/standings/all');
+        $standing = $api->get('pools/tournaments/'.$tournament_id.'/standings');
 
         require_once '../src/views/includes/header.php';
         require_once '../src/views/ranking.php';
