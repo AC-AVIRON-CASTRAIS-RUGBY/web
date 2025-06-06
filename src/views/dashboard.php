@@ -71,8 +71,12 @@
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <div class="empty-calendar">
-                    <p>Aucun match planifié</p>
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="far fa-calendar-alt"></i>
+                    </div>
+                    <p class="empty-message">Aucun match planifié</p>
+                    <p class="empty-description">Les prochains matchs apparaîtront ici une fois le calendrier établi</p>
                 </div>
             <?php endif; ?>
         </div>
@@ -104,15 +108,25 @@
             </div>
             
             <div class="teams-list">
-                <?php foreach ($teams as $team): 
-                    $teamCategory = $team['age_category'] ?? 'unknown';
-                ?>
-                    <div class="team-item" data-category="<?= htmlspecialchars($teamCategory) ?>">
-                        <img src="<?php echo $team['logo']; ?>" alt="Logo de l'équipe" style="width: 30px; height: 30px; border-radius: 50%;">
-                        <span><?php echo $team['name']; ?></span>
-                        <span class="badge <?= htmlspecialchars($teamCategory) ?>"><?= strtoupper($teamCategory) ?></span>
+                <?php if (!empty($teams)): ?>
+                    <?php foreach ($teams as $team): 
+                        $teamCategory = $team['Category_Id'] ?? 'unknown';
+                    ?>
+                        <div class="team-item" data-category="<?= htmlspecialchars($teamCategory) ?>">
+                            <img src="<?php echo $team['logo']; ?>" alt="Logo de l'équipe" style="width: 30px; height: 30px; border-radius: 50%;">
+                            <span><?php echo $team['name']; ?></span>
+                            <span class="badge <?= htmlspecialchars($teamCategory) ?>"><?= strtoupper($teamCategory) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <p class="empty-message">Aucune équipe inscrite</p>
+                        <p class="empty-description">Commencez par ajouter des équipes à votre tournoi</p>
                     </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -136,31 +150,41 @@
             $referees = array_values($uniqueReferees);
             ?>
             <div class="referees-list" id="refereesList">
-                <?php foreach ($referees as $referee): ?>
-                    <div class="referee-item">
-                        <div class="referee-info">
-                            <div class="referee-name">
-                                <?php echo htmlspecialchars($referee['last_name']); ?> <?php echo htmlspecialchars($referee['first_name']); ?>
+                <?php if (!empty($referees)): ?>
+                    <?php foreach ($referees as $referee): ?>
+                        <div class="referee-item">
+                            <div class="referee-info">
+                                <div class="referee-name">
+                                    <?php echo htmlspecialchars($referee['last_name']); ?> <?php echo htmlspecialchars($referee['first_name']); ?>
+                                </div>
+                                <div class="referee-stats">
+                                    <?php 
+                                    $gamesCount = $referee['games_count'];
+                                    $badgeClass = '';
+                                    if ($gamesCount === 0) {
+                                        $badgeClass = 'no-games';
+                                    } elseif ($gamesCount >= 5) {
+                                        $badgeClass = 'many-games';
+                                    }
+                                    ?>
+                                    <span class="games-count <?= $badgeClass ?>">
+                                        <i class="fas fa-whistle"></i> 
+                                        <span class="count"><?= $gamesCount ?></span> match<?= $gamesCount > 1 ? 's' : '' ?>
+                                    </span>
+                                </div>
                             </div>
-                            <div class="referee-stats">
-                                <?php 
-                                $gamesCount = $referee['games_count'];
-                                $badgeClass = '';
-                                if ($gamesCount === 0) {
-                                    $badgeClass = 'no-games';
-                                } elseif ($gamesCount >= 5) {
-                                    $badgeClass = 'many-games';
-                                }
-                                ?>
-                                <span class="games-count <?= $badgeClass ?>">
-                                    <i class="fas fa-whistle"></i> 
-                                    <span class="count"><?= $gamesCount ?></span> match<?= $gamesCount > 1 ? 's' : '' ?>
-                                </span>
-                            </div>
+                            <div class="edit-btn"><i class="fas fa-pen"></i></div>
                         </div>
-                        <div class="edit-btn"><i class="fas fa-pen"></i></div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <i class="fas fa-gavel"></i>
+                        </div>
+                        <p class="empty-message">Aucun arbitre assigné</p>
+                        <p class="empty-description">Ajoutez des arbitres pour gérer vos matchs</p>
                     </div>
-                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -369,14 +393,67 @@ document.addEventListener('DOMContentLoaded', function() {
     box-shadow: 0 4px 12px rgba(35, 44, 90, 0.15);
 }
 
+/* Styles pour les états vides */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #666;
+    min-height: 200px;
+}
+
+.empty-icon {
+    font-size: 48px;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-message {
+    font-size: 18px;
+    font-weight: 500;
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.empty-description {
+    font-size: 14px;
+    margin: 0;
+    color: #999;
+    max-width: 300px;
+    line-height: 1.4;
+}
+
+/* Style spécifique pour l'état vide du calendrier */
+.calendar-items .empty-state {
+    min-height: 150px;
+    padding: 30px 20px;
+}
+
+.calendar-items .empty-icon {
+    font-size: 36px;
+}
+
+/* Responsive pour les états vides */
 @media (max-width: 768px) {
-    .referee-info {
-        gap: 5px;
+    .empty-state {
+        padding: 30px 15px;
+        min-height: 150px;
     }
     
-    .games-count {
-        font-size: 11px;
-        padding: 3px 6px;
+    .empty-icon {
+        font-size: 36px;
+        margin-bottom: 15px;
+    }
+    
+    .empty-message {
+        font-size: 16px;
+    }
+    
+    .empty-description {
+        font-size: 13px;
     }
 }
 </style>

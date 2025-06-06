@@ -25,7 +25,7 @@ class ExportController {
             $standing = $this->apiClient->get('pools/tournaments/' . $tournament_id . '/standings/all');
 
             if (empty($standing) || !is_array($standing)) {
-                $_SESSION['error'] = "Aucune donnée de classement disponible pour l'export";
+                $_SESSION['error'] = "Aucun classement disponible pour ce tournoi";
                 header('Location: index.php?route=ranking&tournament_id=' . $tournament_id);
                 exit;
             }
@@ -38,6 +38,7 @@ class ExportController {
             );
 
         } catch (Exception $e) {
+            error_log('Export error: ' . $e->getMessage());
             $_SESSION['error'] = "Erreur lors de l'export: " . $e->getMessage();
             header('Location: index.php?route=ranking&tournament_id=' . $tournament_id);
             exit;

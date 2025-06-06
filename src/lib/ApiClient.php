@@ -25,6 +25,11 @@ class ApiClient {
             'Accept: application/json'
         ]);
         
+        // Options SSL pour résoudre les problèmes de certificat
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+        
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
@@ -36,6 +41,27 @@ class ApiClient {
         
         if ($httpCode >= 200 && $httpCode < 300) {
             return json_decode($response, true) ?? [];
+        } else if ($httpCode === 404) {
+            // Gérer spécifiquement les 404 qui peuvent être des cas normaux (pas d'arbitres, etc.)
+            $errorResponse = json_decode($response, true);
+            if ($errorResponse && isset($errorResponse['message'])) {
+                // Cas spéciaux où 404 signifie "aucun résultat" plutôt qu'une erreur
+                $emptyResultMessages = [
+                    'Aucun arbitre trouvé pour ce tournoi',
+                    'Aucune équipe trouvée pour ce tournoi',
+                    'Aucun match trouvé',
+                    'Aucune catégorie trouvée',
+                    'Aucun résultat trouvé'
+                ];
+                
+                if (in_array($errorResponse['message'], $emptyResultMessages) || 
+                    strpos($errorResponse['message'], 'Aucun') === 0) {
+                    return []; // Retourner un tableau vide plutôt qu'une erreur
+                }
+            }
+            
+            // Pour les autres 404, lever une exception
+            throw new Exception('API request failed with HTTP code: ' . $httpCode . ' - ' . ($errorResponse['message'] ?? $response));
         } else {
             throw new Exception('API request failed with HTTP code: ' . $httpCode . ' - Response: ' . $response);
         }
@@ -50,6 +76,7 @@ class ApiClient {
      */
     public function post($endpoint, $data) {
         $url = $this->baseUrl . '/' . ltrim($endpoint, '/');
+
         
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -62,9 +89,14 @@ class ApiClient {
             'Accept: application/json'
         ]);
         
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+        
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
+                
         curl_close($ch);
         
         if ($error) {
@@ -72,9 +104,25 @@ class ApiClient {
         }
         
         if ($httpCode >= 200 && $httpCode < 300) {
-            return json_decode($response, true) ?? [];
+            $decoded = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('Invalid JSON response: ' . $response);
+            }
+            return $decoded ?? [];
         } else {
-            throw new Exception('API request failed with HTTP code: ' . $httpCode . ' - Response: ' . $response);
+            // Essayer de décoder la réponse d'erreur pour plus de détails
+            $errorResponse = json_decode($response, true);
+            $errorMessage = 'API request failed with HTTP code: ' . $httpCode;
+            
+            if ($errorResponse && isset($errorResponse['message'])) {
+                $errorMessage .= ' - ' . $errorResponse['message'];
+            } elseif ($errorResponse && isset($errorResponse['error'])) {
+                $errorMessage .= ' - ' . $errorResponse['error'];
+            } else {
+                $errorMessage .= ' - Response: ' . $response;
+            }
+            
+            throw new Exception($errorMessage);
         }
     }
 
@@ -98,6 +146,10 @@ class ApiClient {
             'Content-Type: application/json',
             'Accept: application/json'
         ]);
+        
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -219,6 +271,10 @@ class ApiClient {
             // Ne pas définir Content-Type pour multipart/form-data, cURL le fait automatiquement
         ]);
         
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
+        
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $error = curl_error($ch);
@@ -266,6 +322,10 @@ class ApiClient {
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Accept: application/json'
         ]);
+        
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2);
         
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

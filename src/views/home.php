@@ -114,17 +114,23 @@
                     <h4><i class="fas fa-award"></i> Système de points</h4>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="pointsWin">Points victoire</label>
+                            <label for="pointsWin">
+                                <i class="fas fa-trophy"></i> Victoire
+                            </label>
                             <input type="number" id="pointsWin" name="points_win" 
                                    value="3" min="0" max="10">
                         </div>
                         <div class="form-group">
-                            <label for="pointsDraw">Points match nul</label>
+                            <label for="pointsDraw">
+                                <i class="fas fa-handshake"></i> Match nul
+                            </label>
                             <input type="number" id="pointsDraw" name="points_draw" 
                                    value="1" min="0" max="10">
                         </div>
                         <div class="form-group">
-                            <label for="pointsLoss">Points défaite</label>
+                            <label for="pointsLoss">
+                                <i class="fas fa-times"></i> Défaite
+                            </label>
                             <input type="number" id="pointsLoss" name="points_loss" 
                                    value="0" min="0" max="10">
                         </div>
@@ -137,11 +143,23 @@
                     </label>
                     <input type="file" id="tournamentImage" name="image" 
                            accept="image/*" class="file-input">
+                    
+                    <!-- Champ caché pour stocker l'URL de l'image -->
+                    <input type="hidden" id="imageUrl" name="image_url" value="">
+                    
                     <div class="file-preview" id="imagePreview" style="display: none;">
                         <img id="previewImg" src="" alt="Aperçu">
                         <button type="button" onclick="removeImage()" class="remove-image">
                             <i class="fas fa-times"></i>
                         </button>
+                    </div>
+                    
+                    <!-- Indicateur d'upload -->
+                    <div class="upload-status" id="uploadStatus" style="display: none;">
+                        <div class="upload-progress">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span id="uploadText">Upload en cours...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -368,6 +386,44 @@
     transform: none;
 }
 
+/* Styles pour l'indicateur d'upload */
+.upload-status {
+    margin-top: 10px;
+    padding: 10px;
+    background: #e8f4ff;
+    border: 1px solid #bee5eb;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.upload-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #232c5a;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.upload-status.success {
+    background: #e8f5e8;
+    border-color: #c8e6c9;
+}
+
+.upload-status.success .upload-progress {
+    color: #2e7d32;
+}
+
+.upload-status.error {
+    background: #fff5f5;
+    border-color: #fed7d7;
+}
+
+.upload-status.error .upload-progress {
+    color: #c53030;
+}
+
 @media (max-width: 768px) {
     .modal-content {
         width: 95%;
@@ -395,13 +451,13 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('createTournamentBtn')?.addEventListener('click', openCreateTournamentModal);
     document.getElementById('createFirstTournamentBtn')?.addEventListener('click', openCreateTournamentModal);
     
-    // Gérer la prévisualisation de l'image
-    document.getElementById('tournamentImage')?.addEventListener('change', previewImage);
+    // Gérer la sélection d'image pour upload immédiat
+    document.getElementById('tournamentImage')?.addEventListener('change', handleImageSelection);
     
     // Gérer la soumission du formulaire
     document.getElementById('createTournamentForm')?.addEventListener('submit', handleCreateTournament);
     
-    // Définir la date par défaut à aujourd'hui
+    // Définir la date par défaut à demain
     const dateInput = document.getElementById('tournamentDate');
     if (dateInput) {
         const today = new Date();
@@ -444,7 +500,94 @@ function previewImage(event) {
 
 function removeImage() {
     document.getElementById('tournamentImage').value = '';
+    document.getElementById('imageUrl').value = '';
     document.getElementById('imagePreview').style.display = 'none';
+    document.getElementById('uploadStatus').style.display = 'none';
+}
+
+async function handleImageSelection(event) {
+    const file = event.target.files[0];
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const uploadText = document.getElementById('uploadText');
+    const imageUrlInput = document.getElementById('imageUrl');
+    
+    // Réinitialiser les états
+    preview.style.display = 'none';
+    uploadStatus.style.display = 'none';
+    uploadStatus.className = 'upload-status';
+    imageUrlInput.value = '';
+    
+    if (file) {
+        // Afficher la prévisualisation immédiatement
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+        
+        // Démarrer l'upload
+        uploadStatus.style.display = 'block';
+        uploadText.textContent = 'Upload en cours...';
+        
+        try {
+            console.log('Début upload immédiat de l\'image:', file.name);
+            const imageUrl = await uploadImageToAPI(file);
+            
+            // Stocker l'URL dans le champ caché
+            imageUrlInput.value = imageUrl;
+            
+            // Afficher le succès
+            uploadStatus.className = 'upload-status success';
+            uploadText.innerHTML = '<i class="fas fa-check"></i> Image uploadée avec succès';
+            
+            console.log('Image uploadée avec succès, URL stockée:', imageUrl);
+            
+        } catch (error) {
+            console.error('Erreur upload image:', error);
+            
+            // Afficher l'erreur
+            uploadStatus.className = 'upload-status error';
+            uploadText.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erreur d\'upload: ' + error.message;
+            
+            // Masquer la prévisualisation en cas d'erreur
+            preview.style.display = 'none';
+        }
+    }
+}
+
+async function uploadImageToAPI(imageFile) {
+    const uploadFormData = new FormData();
+    uploadFormData.append('image', imageFile);
+    
+    const response = await fetch('index.php?route=upload-image', {
+        method: 'POST',
+        body: uploadFormData
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage;
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.error || 'Erreur lors de l\'upload';
+        } catch (e) {
+            errorMessage = 'Erreur lors de l\'upload de l\'image';
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    
+    if (!result.success || !result.url) {
+        throw new Error('URL de l\'image non retournée par l\'API');
+    }
+    
+    return result.url;
 }
 
 async function handleCreateTournament(event) {
@@ -453,49 +596,33 @@ async function handleCreateTournament(event) {
     const submitBtn = event.target.querySelector('.btn-save');
     const originalText = submitBtn.innerHTML;
     
-    // Désactiver le bouton pendant la création
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création en cours...';
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création du tournoi...';
     
     try {
         const formData = new FormData(event.target);
+
+        const imageUrl = formData.get('image_url');
         
-        // Préparer les données pour l'API
         const tournamentData = {
             name: formData.get('name'),
             description: formData.get('description') || '',
             location: formData.get('location'),
-            start_date: new Date(formData.get('start_date')).toISOString(),
+            start_date: formData.get('start_date'),
             break_time: parseInt(formData.get('break_time')) || 5,
             points_win: parseInt(formData.get('points_win')) || 3,
             points_draw: parseInt(formData.get('points_draw')) || 1,
-            points_loss: parseInt(formData.get('points_loss')) || 0
+            points_loss: parseInt(formData.get('points_loss')) || 0,
+            account_id: <?= $_SESSION['user_id'] ?>
         };
-        
-        // Gérer l'upload de l'image si présente
-        const imageFile = formData.get('image');
-        if (imageFile && imageFile.size > 0) {
-            try {
-                const imageFormData = new FormData();
-                imageFormData.append('image', imageFile);
-                
-                const uploadResponse = await fetch('https://api.avironcastrais.fr/upload/image', {
-                    method: 'POST',
-                    body: imageFormData
-                });
-                
-                if (uploadResponse.ok) {
-                    const uploadResult = await uploadResponse.json();
-                    tournamentData.image = uploadResult.url;
-                }
-            } catch (uploadError) {
-                console.warn('Erreur upload image:', uploadError);
-                // Continuer sans image si l'upload échoue
-            }
+        if (imageUrl) {
+            tournamentData.image = imageUrl;
         }
         
-        // Créer le tournoi
-        const response = await fetch('https://api.avironcastrais.fr/tournaments', {
+        console.log('Données du tournoi à envoyer:');
+        console.log(tournamentData.image);
+        
+        const response = await fetch('index.php?route=create-tournament', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -503,27 +630,20 @@ async function handleCreateTournament(event) {
             body: JSON.stringify(tournamentData)
         });
         
-        if (response.ok) {
-            const result = await response.json();
-            
-            // Fermer le modal
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
             closeCreateTournamentModal();
-            
-            // Afficher un message de succès
             alert('Tournoi créé avec succès !');
-            
-            // Recharger la page pour afficher le nouveau tournoi
             window.location.reload();
         } else {
-            const errorText = await response.text();
-            throw new Error('Erreur lors de la création: ' + response.status + ' - ' + errorText);
+            throw new Error(result.error || 'Erreur lors de la création du tournoi');
         }
         
     } catch (error) {
         console.error('Erreur création tournoi:', error);
-        alert('Erreur lors de la création du tournoi. Veuillez réessayer.');
+        alert('Erreur lors de la création du tournoi: ' + error.message);
     } finally {
-        // Réactiver le bouton
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     }
