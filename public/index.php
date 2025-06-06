@@ -33,7 +33,7 @@ switch ($route) {
 
     case 'home':
         $api = new ApiClient();
-        $tournaments = $api->get('referees/tournaments/' . $_SESSION['user_id'] . '');
+        $tournaments = $api->get('tournaments/');
 
         require_once '../src/views/includes/header.php';
         require_once '../src/views/home.php';
