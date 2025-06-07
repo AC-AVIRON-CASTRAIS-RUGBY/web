@@ -179,6 +179,37 @@ switch ($route) {
 
         $api = new ApiClient();
         $schedule = $api->get('schedule/tournaments/'.$tournament_id);
+        
+        // Fetch additional data needed for creating matches
+        $teams = [];
+        $referees = [];
+        $pools = [];
+        $fields = [];
+        
+        try {
+            $teams = $api->get('teams/tournaments/' . $tournament_id) ?: [];
+        } catch (Exception $e) {
+            error_log('Error fetching teams for calendar: ' . $e->getMessage());
+        }
+        
+        try {
+            $referees = $api->get('referees/tournaments/' . $tournament_id) ?: [];
+        } catch (Exception $e) {
+            error_log('Error fetching referees for calendar: ' . $e->getMessage());
+        }
+        
+        try {
+            $pools = $api->get('pools/tournaments/' . $tournament_id) ?: [];
+        } catch (Exception $e) {
+            error_log('Error fetching pools for calendar: ' . $e->getMessage());
+        }
+        
+        try {
+            $fields = $api->get('fields/tournaments/' . $tournament_id) ?: [];
+        } catch (Exception $e) {
+            error_log('Error fetching fields for calendar: ' . $e->getMessage());
+            // Fields are optional, so we don't need to worry if this fails
+        }
 
         require_once '../src/views/includes/header.php';
         require_once '../src/views/calendar.php';
@@ -926,6 +957,103 @@ switch ($route) {
             error_log('Referee deletion error: ' . $e->getMessage());
             http_response_code(500);
             echo json_encode(['error' => 'Erreur lors de la suppression de l\'arbitre: ' . $e->getMessage()]);
+        }
+        exit;
+
+    case 'create-match':
+        header('Content-Type: application/json');
+        
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            http_response_code(405);
+            echo json_encode(['error' => 'Method not allowed']);
+            exit;
+        }
+
+        $tournament_id = $_GET['tournament_id'] ?? null;
+        
+        if (!$tournament_id) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Tournament ID is required']);
+            exit;
+        }
+
+        try {
+            $api = new ApiClient();
+            
+            // Get JSON data
+            $input = file_get_contents('php://input');
+            $matchData = json_decode($input, true);
+            
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Invalid JSON data']);
+                exit;
+            }
+
+            // Validate required fields
+            $requiredFields = ['start_time', 'Team1_Id', 'Team2_Id', 'Referee_Id', 'Pool_Id', 'Tournament_Id'];
+            foreach ($requiredFields as $field) {
+                if (!isset($matchData[$field]) || 
+                    (is_string($matchData[$field]) && trim($matchData[$field]) === '') ||
+                    (is_numeric($matchData[$field]) && $matchData[$field] <= 0 && $field !== 'Team1_Score' && $field !== 'Team2_Score')) {
+                    http_response_code(400);
+                    echo json_encode(['error' => "Le champ {$field} est requis"]);
+                    exit;
+                }
+            }
+
+            // Validate that teams are different
+            if ($matchData['Team1_Id'] === $matchData['Team2_Id']) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Les deux équipes doivent être différentes']);
+                exit;
+            }
+
+            // Validate date format
+            try {
+                $date = new DateTime($matchData['start_time']);
+                $matchData['start_time'] = $date->format('c'); // Ensure ISO format
+            } catch (Exception $e) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Format de date invalide']);
+                exit;
+            }
+
+            // Set default values for scores and completion status
+            $matchData['Team1_Score'] = (int)($matchData['Team1_Score'] ?? 0);
+            $matchData['Team2_Score'] = (int)($matchData['Team2_Score'] ?? 0);
+            $matchData['is_completed'] = (bool)($matchData['is_completed'] ?? false);
+
+            // Convert IDs to integers
+            $matchData['Team1_Id'] = (int)$matchData['Team1_Id'];
+            $matchData['Team2_Id'] = (int)$matchData['Team2_Id'];
+            $matchData['Referee_Id'] = (int)$matchData['Referee_Id'];
+            $matchData['Pool_Id'] = (int)$matchData['Pool_Id'];
+            $matchData['Tournament_Id'] = (int)$matchData['Tournament_Id'];
+
+            // Field_Id is optional
+            if (isset($matchData['Field_Id']) && !empty($matchData['Field_Id'])) {
+                $matchData['Field_Id'] = (int)$matchData['Field_Id'];
+            } else {
+                unset($matchData['Field_Id']);
+            }
+
+            error_log('Create match - Sending to API: ' . json_encode($matchData));
+
+            // Create match via API
+            $result = $api->post('games', $matchData);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Match créé avec succès',
+                'data' => $result
+            ]);
+
+        } catch (Exception $e) {
+            error_log('Match creation error: ' . $e->getMessage());
+            error_log('Match creation error trace: ' . $e->getTraceAsString());
+            http_response_code(500);
+            echo json_encode(['error' => 'Erreur lors de la création du match: ' . $e->getMessage()]);
         }
         exit;
 

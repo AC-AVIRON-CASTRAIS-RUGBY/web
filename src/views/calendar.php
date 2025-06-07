@@ -19,6 +19,9 @@
                 <i class="far fa-calendar-alt"></i>
                 <span>Planning des matchs</span>
             </div>
+            <button class="btn-add-match" onclick="openCreateMatchModal()">
+                <i class="fas fa-plus"></i> Créer un match
+            </button>
         </div>
 
         <!-- Filtres -->
@@ -157,8 +160,151 @@
                 <div class="empty-calendar">
                     <i class="far fa-calendar-alt empty-icon"></i>
                     <p>Aucun match planifié</p>
+                    <button class="btn-add" onclick="openCreateMatchModal()">
+                        <i class="fas fa-plus"></i> Créer le premier match
+                    </button>
                 </div>
             <?php endif; ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de création de match -->
+<div class="modal-overlay" id="createMatchModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-plus"></i> Créer un nouveau match</h3>
+            <button class="btn-close" onclick="closeCreateMatchModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="createMatchForm">
+            <div class="modal-body">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="matchDateTime">
+                            <i class="fas fa-calendar-alt"></i> Date et heure
+                        </label>
+                        <input type="datetime-local" id="matchDateTime" name="start_time" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="team1Select">
+                            <i class="fas fa-users"></i> Équipe 1
+                        </label>
+                        <select id="team1Select" name="Team1_Id" required>
+                            <option value="">Sélectionner une équipe</option>
+                            <?php if (!empty($teams)): ?>
+                                <?php foreach ($teams as $team): ?>
+                                    <option value="<?= $team['Team_Id'] ?>"><?= htmlspecialchars($team['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div class="vs-indicator">VS</div>
+
+                    <div class="form-group">
+                        <label for="team2Select">
+                            <i class="fas fa-users"></i> Équipe 2
+                        </label>
+                        <select id="team2Select" name="Team2_Id" required>
+                            <option value="">Sélectionner une équipe</option>
+                            <?php if (!empty($teams)): ?>
+                                <?php foreach ($teams as $team): ?>
+                                    <option value="<?= $team['Team_Id'] ?>"><?= htmlspecialchars($team['name']) ?></option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="refereeSelect">
+                            <i class="fas fa-user-tie"></i> Arbitre
+                        </label>
+                        <select id="refereeSelect" name="Referee_Id" required>
+                            <option value="">Sélectionner un arbitre</option>
+                            <?php if (!empty($referees)): ?>
+                                <?php foreach ($referees as $referee): ?>
+                                    <option value="<?= $referee['Referee_Id'] ?>">
+                                        <?= htmlspecialchars($referee['last_name'] . ' ' . $referee['first_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="poolSelect">
+                            <i class="fas fa-layer-group"></i> Poule
+                        </label>
+                        <select id="poolSelect" name="Pool_Id" required>
+                            <option value="">Sélectionner une poule</option>
+                            <?php if (!empty($pools)): ?>
+                                <?php foreach ($pools as $pool): ?>
+                                    <option value="<?= $pool['Pool_Id'] ?>">
+                                        <?= htmlspecialchars($pool['name'] ?? 'Poule ' . $pool['Pool_Id']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="fieldSelect">
+                            <i class="fas fa-map-marker-alt"></i> Terrain (optionnel)
+                        </label>
+                        <select id="fieldSelect" name="Field_Id">
+                            <option value="">Aucun terrain spécifique</option>
+                            <?php if (!empty($fields)): ?>
+                                <?php foreach ($fields as $field): ?>
+                                    <option value="<?= $field['Field_Id'] ?>">
+                                        <?= htmlspecialchars($field['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-notice">
+                    <i class="fas fa-info-circle"></i>
+                    <p>Le match sera créé avec un score initial de 0-0 et sera marqué comme "En attente".</p>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeCreateMatchModal()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="submit" class="btn-save">
+                    <i class="fas fa-plus"></i> Créer le match
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de confirmation -->
+<div class="modal-overlay" id="matchCreatedModal">
+    <div class="modal-content small">
+        <div class="modal-header">
+            <h3><i class="fas fa-check-circle"></i> Match créé</h3>
+        </div>
+        <div class="modal-body">
+            <p>Le match a été créé avec succès !</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-success" onclick="closeMatchCreatedModal()">
+                <i class="fas fa-check"></i> OK
+            </button>
         </div>
     </div>
 </div>
@@ -291,6 +437,146 @@ function resetFilters() {
     const event = new Event('input');
     document.getElementById('searchInput').dispatchEvent(event);
 }
+
+function openCreateMatchModal() {
+    document.getElementById('createMatchModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    
+    // Set default date/time to current time + 1 hour
+    const now = new Date();
+    now.setHours(now.getHours() + 1);
+    const defaultDateTime = now.toISOString().slice(0, 16);
+    document.getElementById('matchDateTime').value = defaultDateTime;
+}
+
+function closeCreateMatchModal() {
+    document.getElementById('createMatchModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+    document.getElementById('createMatchForm').reset();
+}
+
+function closeMatchCreatedModal() {
+    document.getElementById('matchCreatedModal').classList.remove('show');
+    document.body.style.overflow = 'auto';
+    // Reload page to show new match
+    window.location.reload();
+}
+
+// Handle create match form submission
+document.getElementById('createMatchForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const team1Id = formData.get('Team1_Id');
+    const team2Id = formData.get('Team2_Id');
+    
+    // Validation: teams can't be the same
+    if (team1Id === team2Id) {
+        alert('Les deux équipes doivent être différentes');
+        return;
+    }
+    
+    // Convert datetime-local to ISO format
+    const startTime = formData.get('start_time');
+    const isoDateTime = new Date(startTime).toISOString();
+    
+    const matchData = {
+        start_time: isoDateTime,
+        Team1_Id: parseInt(team1Id),
+        Team2_Id: parseInt(team2Id),
+        Team1_Score: 0,
+        Team2_Score: 0,
+        is_completed: false,
+        Referee_Id: parseInt(formData.get('Referee_Id')),
+        Pool_Id: parseInt(formData.get('Pool_Id')),
+        Tournament_Id: <?= $_GET['tournament_id'] ?>
+    };
+    
+    // Add Field_Id if selected
+    const fieldId = formData.get('Field_Id');
+    if (fieldId) {
+        matchData.Field_Id = parseInt(fieldId);
+    }
+    
+    const submitBtn = this.querySelector('.btn-save');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Création...';
+    
+    try {
+        const response = await fetch(`index.php?route=create-match&tournament_id=<?= $_GET['tournament_id'] ?>`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(matchData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            closeCreateMatchModal();
+            setTimeout(() => {
+                document.getElementById('matchCreatedModal').classList.add('show');
+            }, 300);
+        } else {
+            throw new Error(result.error || 'Erreur lors de la création du match');
+        }
+    } catch (error) {
+        console.error('Error creating match:', error);
+        alert('Erreur lors de la création du match: ' + error.message);
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
+});
+
+// Prevent selecting same team for both sides
+document.getElementById('team1Select').addEventListener('change', function() {
+    const team2Select = document.getElementById('team2Select');
+    const selectedTeam1 = this.value;
+    
+    // Re-enable all options in team2
+    Array.from(team2Select.options).forEach(option => {
+        option.disabled = false;
+    });
+    
+    // Disable selected team1 in team2
+    if (selectedTeam1) {
+        const team2Option = team2Select.querySelector(`option[value="${selectedTeam1}"]`);
+        if (team2Option) {
+            team2Option.disabled = true;
+        }
+        
+        // If team2 currently has the same value, reset it
+        if (team2Select.value === selectedTeam1) {
+            team2Select.value = '';
+        }
+    }
+});
+
+document.getElementById('team2Select').addEventListener('change', function() {
+    const team1Select = document.getElementById('team1Select');
+    const selectedTeam2 = this.value;
+    
+    // Re-enable all options in team1
+    Array.from(team1Select.options).forEach(option => {
+        option.disabled = false;
+    });
+    
+    // Disable selected team2 in team1
+    if (selectedTeam2) {
+        const team1Option = team1Select.querySelector(`option[value="${selectedTeam2}"]`);
+        if (team1Option) {
+            team1Option.disabled = true;
+        }
+        
+        // If team1 currently has the same value, reset it
+        if (team1Select.value === selectedTeam2) {
+            team1Select.value = '';
+        }
+    }
+});
 </script>
 
 <style>
@@ -489,6 +775,288 @@ function resetFilters() {
     margin-bottom: 20px;
 }
 
+/* Create match button */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.btn-add-match {
+    background: linear-gradient(135deg, #2e7d32, #1b5e20);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.btn-add-match:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.4);
+}
+
+/* Modal styles */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-content.small {
+    max-width: 400px;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e0e0e0;
+    background: linear-gradient(135deg, #232c5a, #1a2147);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-header h3 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+}
+
+.btn-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 20px 25px;
+    border-top: 1px solid #e0e0e0;
+    background-color: #f8f9fa;
+    border-radius: 0 0 15px 15px;
+}
+
+/* Form styles for create match modal */
+.form-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    align-items: end;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-group label i {
+    color: #232c5a;
+    width: 16px;
+    text-align: center;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px;
+    border: 2px solid #e1e5e9;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    background-color: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #232c5a;
+    box-shadow: 0 0 0 3px rgba(35, 44, 90, 0.1);
+}
+
+.form-group select option:disabled {
+    color: #ccc;
+    background-color: #f5f5f5;
+}
+
+.vs-indicator {
+    background: linear-gradient(135deg, #232c5a, #1a2147);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 14px;
+    align-self: center;
+    margin-bottom: 8px;
+    white-space: nowrap;
+}
+
+.form-notice {
+    background-color: #e3f2fd;
+    border: 1px solid #90caf9;
+    border-radius: 8px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.form-notice i {
+    color: #1976d2;
+    margin-top: 2px;
+    flex-shrink: 0;
+}
+
+.form-notice p {
+    margin: 0;
+    font-size: 13px;
+    color: #1565c0;
+    line-height: 1.4;
+}
+
+/* Modal buttons */
+.btn-cancel, .btn-save, .btn-success {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.btn-save {
+    background-color: #232c5a;
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #1a2147;
+    transform: translateY(-1px);
+}
+
+.btn-save:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-success {
+    background-color: #2e7d32;
+    color: white;
+    width: 100%;
+    justify-content: center;
+}
+
+.btn-success:hover {
+    background-color: #1b5e20;
+    transform: translateY(-1px);
+}
+
+/* Empty state button */
+.btn-add {
+    background: linear-gradient(135deg, #232c5a, #1a2147);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.btn-add:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(35, 44, 90, 0.3);
+    color: white;
+    text-decoration: none;
+}
+
 /* Responsive pour les filtres */
 @media (max-width: 768px) {
     .calendar-filters {
@@ -528,6 +1096,44 @@ function resetFilters() {
     .calendar-item {
         padding-top: 10px;
     }
+
+    /* Mobile responsive for modal and form */
+    .calendar-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .vs-indicator {
+        order: -1;
+        align-self: center;
+        margin-bottom: 0;
+    }
+    
+    .form-group {
+        width: 100%;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+        max-height: 95vh;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-cancel, .btn-save {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 @media (max-width: 480px) {
@@ -547,6 +1153,43 @@ function resetFilters() {
     .status-badge {
         font-size: 10px;
         padding: 3px 6px;
+    }
+
+    .btn-add-match {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .modal-content {
+        margin: 5px;
+        width: calc(100% - 10px);
+    }
+
+    .modal-header {
+        padding: 15px 20px;
+    }
+
+    .modal-body {
+        padding: 20px;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+    }
+
+    .form-group label {
+        font-size: 13px;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .vs-indicator {
+        padding: 10px 14px;
+        font-size: 12px;
     }
 }
 </style>
