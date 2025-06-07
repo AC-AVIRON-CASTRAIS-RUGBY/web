@@ -52,12 +52,12 @@
                         <div class="time"><?= $formattedTime ?></div>
                         <div class="match">
                             <div class="team">
-                                <img src="/api/placeholder/30/30" alt="Logo" class="team-logo">
+                                <img src="<?= game['logo'] ?>" alt="Logo" class="team-logo">
                                 <span><?= htmlspecialchars($game['team1']['name']) ?></span>
                             </div>
                             <div class="vs">vs</div>
                             <div class="team">
-                                <img src="/api/placeholder/30/30" alt="Logo" class="team-logo">
+                                <img src="<?= game['logo'] ?>" alt="Logo" class="team-logo">
                                 <span><?= htmlspecialchars($game['team2']['name']) ?></span>
                             </div>
                         </div>
