@@ -26,11 +26,6 @@
         </div>
 
         <div class="referees-table-container">
-            <?php
-echo '<pre>';
-var_dump($referees);
-echo '</pre>';
-?>
             <?php if (!empty($referees)): ?>
                 <table class="referees-table">
                     <thead>
@@ -44,6 +39,15 @@ echo '</pre>';
                         </tr>
                     </thead>
                     <tbody>
+                    <?php
+
+                    $uniqueReferees = [];
+                    foreach ($referees as $r) {
+                        $uniqueReferees[$r['Referee_Id']] = $r;
+                    }
+                    $referees = array_values($uniqueReferees);
+
+                    ?>
                         <?php foreach ($referees as $referee): ?>
                             <tr data-referee-id="<?= $referee['Referee_Id'] ?>">
                                 <td class="referee-name"><?= htmlspecialchars($referee['last_name']) ?></td>
