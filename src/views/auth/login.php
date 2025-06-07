@@ -16,7 +16,7 @@
 
         <div class="welcome-text">
             <h2>Aviron Castrais</h2>
-            <p>Gérez facilement vos équipes, arbitres et compétitions d'aviron</p>
+            <p>Gérez facilement vos équipes, arbitres et compétitions</p>
         </div>
     </div>
 
