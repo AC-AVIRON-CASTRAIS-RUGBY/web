@@ -45,6 +45,8 @@
                 foreach ($upcomingGames as $game):
                     $startTime = new DateTime($game['startTime']);
                     $formattedTime = $startTime->format('H:i');
+
+                    var_dump($game);
                     ?>
                     <div class="calendar-item clickable-match" 
                          data-match-id="<?= $game['Game_Id'] ?? $game['gameId'] ?>" 
