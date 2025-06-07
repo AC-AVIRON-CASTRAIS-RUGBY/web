@@ -113,17 +113,6 @@
                         <input type="number" id="edit-max-teams-pool" class="hidden" value="<?= $tournament['max_teams_per_pool'] ?? 6 ?>" min="3" max="12">
                     </div>
                 </div>
-                <div class="setting-item">
-                    <label>Format de tournoi</label>
-                    <div class="setting-value">
-                        <span id="tournament-format"><?= $tournament['format'] ?? 'Poules + Élimination directe' ?></span>
-                        <select id="edit-tournament-format" class="hidden">
-                            <option value="pools" <?= ($tournament['format'] ?? '') === 'pools' ? 'selected' : '' ?>>Poules uniquement</option>
-                            <option value="knockout" <?= ($tournament['format'] ?? '') === 'knockout' ? 'selected' : '' ?>>Élimination directe</option>
-                            <option value="pools_knockout" <?= ($tournament['format'] ?? '') === 'pools_knockout' ? 'selected' : '' ?>>Poules + Élimination directe</option>
-                        </select>
-                    </div>
-                </div>
             </div>
             <div class="section-actions hidden" id="game-actions">
                 <button class="btn-save" onclick="saveSection('game')">
