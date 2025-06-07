@@ -26,6 +26,11 @@
         </div>
 
         <div class="referees-table-container">
+            <?php
+echo '<pre>';
+var_dump($referees);
+echo '</pre>';
+?>
             <?php if (!empty($referees)): ?>
                 <table class="referees-table">
                     <thead>
