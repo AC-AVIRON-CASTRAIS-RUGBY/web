@@ -70,9 +70,9 @@
                 <i class="fas fa-chart-bar"></i>
                 <h3>Aucun classement disponible</h3>
                 <p>Les équipes doivent jouer des matchs pour apparaître dans le classement</p>
-                <a href="index.php?route=calendar&tournament_id=<?= $_GET['tournament_id'] ?>" class="btn-add">
+                <!--<a href="index.php?route=calendar&tournament_id=<?= $_GET['tournament_id'] ?>" class="btn-add">
                     <i class="fas fa-calendar"></i> Voir le calendrier
-                </a>
+                </a>-->
             </div>
         <?php endif; ?>
     </div>
