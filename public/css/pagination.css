@@ -1,0 +1,162 @@
+/* Styles pour la pagination */
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+    margin-bottom: 10px;
+}
+
+.pagination {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+    border-radius: 40px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07), 
+                inset 0 -2px 5px rgba(255, 255, 255, 0.7), 
+                inset 0 2px 5px rgba(0, 0, 0, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.pagination::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.pagination-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border: none;
+    color: #495057;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1), 
+                inset 0 -2px 5px rgba(0, 0, 0, 0.05), 
+                inset 0 2px 5px rgba(255, 255, 255, 0.7);
+    position: relative;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pagination-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: width 0.6s ease-out, height 0.6s ease-out, opacity 0.6s ease-out;
+}
+
+.pagination-btn:active::after {
+    width: 120px;
+    height: 120px;
+    opacity: 1;
+    transition: width 0s, height 0s, opacity 0.3s ease-out;
+}
+
+.pagination-btn:hover {
+    background: linear-gradient(145deg, #232c5a, #2d3875);
+    color: white;
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 5px 15px rgba(35, 44, 90, 0.4),
+                inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+                inset 0 2px 5px rgba(255, 255, 255, 0.2);
+}
+
+.pagination-btn.active {
+    background: linear-gradient(145deg, #232c5a, #2d3875);
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(35, 44, 90, 0.4),
+                inset 0 -2px 5px rgba(0, 0, 0, 0.2),
+                inset 0 2px 5px rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+.pagination-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    animation: pulse-border 1.5s infinite;
+}
+
+@keyframes pulse-border {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.pagination-btn.prev,
+.pagination-btn.next {
+    font-size: 12px;
+    width: 45px;
+    height: 45px;
+    background: linear-gradient(145deg, #232c5a, #2d3875);
+    color: white;
+    font-weight: bold;
+}
+
+.pagination-btn.prev:hover,
+.pagination-btn.next:hover {
+    background: linear-gradient(145deg, #1a2244, #232c5a);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 7px 20px rgba(26, 34, 68, 0.5);
+}
+
+/* Animation de chargement pour la pagination */
+@keyframes pulseAnimation {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.pagination-loading {
+    animation: pulseAnimation 1.5s infinite ease-in-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .pagination {
+        padding: 8px 12px;
+        gap: 6px;
+    }
+    
+    .pagination-btn {
+        width: 35px;
+        height: 35px;
+        font-size: 12px;
+    }
+    
+    .pagination-btn.prev,
+    .pagination-btn.next {
+        width: 40px;
+        height: 40px;
+        font-size: 10px;
+    }
+}

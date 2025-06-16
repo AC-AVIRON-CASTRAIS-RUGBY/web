@@ -342,4 +342,77 @@ class ApiClient {
             throw new Exception('API request failed with HTTP code: ' . $httpCode . ' - Response: ' . $response);
         }
     }
+
+    /**
+     * Enrichit les données de tournoi avec les comptages (équipes, poules, matchs)
+     * 
+     * @param array $tournaments Liste des tournois à enrichir
+     * @return array Les tournois enrichis avec les comptages
+     */
+    public function enrichTournamentsWithCounts($tournaments) {
+        if (empty($tournaments)) {
+            return $tournaments;
+        }
+        
+        foreach ($tournaments as &$tournament) {
+            $tournament_id = $tournament['Tournament_Id'];
+            
+            // Récupérer et compter les équipes
+            try {
+                $teams = $this->get('teams/tournaments/' . $tournament_id);
+                $tournament['teams_count'] = is_array($teams) ? count($teams) : 0;
+            } catch (Exception $e) {
+                $tournament['teams_count'] = 0;
+                error_log('Error fetching teams for tournament ' . $tournament_id . ': ' . $e->getMessage());
+            }
+            
+            // Récupérer et compter les poules
+            try {
+                $pools = $this->get('pools/tournaments/' . $tournament_id);
+                $tournament['pools_count'] = is_array($pools) ? count($pools) : 0;
+            } catch (Exception $e) {
+                $tournament['pools_count'] = 0;
+                error_log('Error fetching pools for tournament ' . $tournament_id . ': ' . $e->getMessage());
+            }
+            
+            // Récupérer tous les matchs et compter ceux qui appartiennent à ce tournoi
+            try {
+                $games = $this->get('games/');
+                $tournament['games_count'] = 0;
+                
+                if (is_array($games)) {
+                    foreach ($games as $game) {
+                        if (isset($game['Tournament_Id']) && $game['Tournament_Id'] == $tournament_id) {
+                            $tournament['games_count']++;
+                        }
+                    }
+                }
+            } catch (Exception $e) {
+                $tournament['games_count'] = 0;
+                error_log('Error fetching games for tournament ' . $tournament_id . ': ' . $e->getMessage());
+            }
+        }
+        
+        return $tournaments;
+    }
+
+    /**
+     * Enrichit les données d'équipes avec un logo par défaut si aucun n'est présent
+     * 
+     * @param array $teams Liste des équipes à enrichir
+     * @return array Les équipes enrichies
+     */
+    public function enrichTeamsWithDefaultLogo($teams) {
+        if (empty($teams)) {
+            return $teams;
+        }
+        
+        foreach ($teams as &$team) {
+            if (empty($team['logo'])) {
+                $team['logo'] = 'img/placeholder-team.svg';
+            }
+        }
+        
+        return $teams;
+    }
 }

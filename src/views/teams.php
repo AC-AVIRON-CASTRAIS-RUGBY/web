@@ -38,13 +38,12 @@
                 </button>
             </div>
 
-            <!-- Filtres par catégorie -->
-            <div class="category-filter">
+            <!-- Filtres par catégorie -->            <div class="category-filter">
                 <button class="category-btn all active" data-category="all">Toutes</button>
                 <?php if (!empty($categories)): ?>
                     <?php foreach ($categories as $category): ?>
                         <button class="category-btn <?= htmlspecialchars($category['name']) ?>" 
-                                data-category="<?= htmlspecialchars($category['name']) ?>">
+                                data-category="<?= htmlspecialchars($category['Category_Id'] ?? $category['id'] ?? $category['categoryId'] ?? 'unknown') ?>">
                             <?= htmlspecialchars(strtoupper($category['name'])) ?>
                         </button>
                     <?php endforeach; ?>

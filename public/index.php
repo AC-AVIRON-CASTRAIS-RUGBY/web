@@ -26,14 +26,12 @@ switch ($route) {
         $authController->login();
         break;
 
-    case 'logout':
-        session_destroy();
+    case 'logout':        session_destroy();
         header('Location: index.php?route=login');
-        break;
-
-    case 'home':
+        break;    case 'home':
         $api = new ApiClient();
         $tournaments = $api->get('tournaments/');
+        $tournaments = $api->enrichTournamentsWithCounts($tournaments);
 
         require_once '../src/views/includes/header.php';
         require_once '../src/views/home.php';
@@ -54,9 +52,10 @@ switch ($route) {
         $referees = [];
         $schedule = [];
         $categories = [];
-        
-        try {
+          try {
             $teams = $api->get('teams/tournaments/' . $tournament_id) ?: [];
+            // Ajouter un logo par défaut aux équipes qui n'en ont pas
+            $teams = $api->enrichTeamsWithDefaultLogo($teams);
         } catch (Exception $e) {
             error_log('Error fetching teams: ' . $e->getMessage());
             $teams = [];
@@ -68,9 +67,22 @@ switch ($route) {
             error_log('Error fetching referees: ' . $e->getMessage());
             $referees = [];
         }
-        
-        try {
+          try {
             $schedule = $api->get('schedule/tournaments/'.$tournament_id) ?: [];
+            
+            // Ajouter un logo par défaut aux équipes dans les matchs
+            if (!empty($schedule) && isset($schedule['schedule'])) {
+                foreach ($schedule['schedule'] as &$poolGames) {
+                    foreach ($poolGames as &$game) {
+                        if (isset($game['team1']) && empty($game['team1']['logo'])) {
+                            $game['team1']['logo'] = 'img/placeholder-team.svg';
+                        }
+                        if (isset($game['team2']) && empty($game['team2']['logo'])) {
+                            $game['team2']['logo'] = 'img/placeholder-team.svg';
+                        }
+                    }
+                }
+            }
         } catch (Exception $e) {
             error_log('Error fetching schedule: ' . $e->getMessage());
             $schedule = [];
